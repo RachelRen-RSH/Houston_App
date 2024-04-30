@@ -50,7 +50,7 @@ require([
         // Talk to modeling person to see what else important information to add in the popup window.
         popupTemplate: {
             title: "Crash Cluster summary",
-            content: "This cluster represents <b>{cluster_count}</b> crashes. <br><b>{expression/local-count}</b> of them happened on local roads.",
+            content: "This cluster represents <b>{cluster_count}</b> crashes. <br><b>{expression/local-count}</b> of them happened on city-owned local roads.",
             fieldInfos: [{
                 fieldName: "cluster_count",
                 format: {
