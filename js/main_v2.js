@@ -226,7 +226,7 @@ require([
             expressionInfos: [{
                 name: "per-sq-mile",
                 title: "Population per Square Mile",
-                expression: "Round($feature.age_totE / $feature.area, 2)"  // Adjust field names as necessary and round the result
+                expression: "Round($feature.age_totE / $feature.area, 0)"  // Adjust field names as necessary and round the result
             }]
         },
         renderer: {
