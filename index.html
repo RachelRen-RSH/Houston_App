@@ -1,0 +1,195 @@
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>City of Houston Vision Zero</title>
+
+  <script src="https://js.arcgis.com/calcite-components/2.6.0/calcite.esm.js" type="module"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+  <link rel="stylesheet" href="https://js.arcgis.com/calcite-components/2.6.0/calcite.css" />
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.29/"></script>
+
+  <script type="text/javascript" src="js/main_v2.js"></script>
+</head>
+
+<body>
+  <calcite-loader></calcite-loader>
+  <!-- Initial Introduction Page -->
+  <calcite-modal aria-labelledby="modal-title" id="example-modal" kind="info">
+    <div slot="header" id="modal-title">
+      Welcome to the City of Houston Vision-Zero Planning Information System
+    </div>
+    <div slot="content">
+      Introduction: </br></br></br></br></br></br>Instruction: </br></br></br></br></br></br>
+    </div>
+    <calcite-button id="go_to_app" slot="primary" width="full">
+      Go to the Application
+    </calcite-button>
+  </calcite-modal>
+
+  <calcite-shell>
+    <div slot="header" class="header-container">
+      <img src="img/Houston_Logo.png" alt="Houston Logo" class="header-image" id="logo_icon">
+      <img src="img/Houston_title.png" alt="First Title Image" class="header-image">
+      <img src="img/vision_zero_title.png" alt="Second Title Image" class="header-image">
+      <h2 style="margin: 0; align-self: flex-end; color: #050F40;"> OUR STREETS · OUR LIVES · OUR COMMITMENT</h2>
+
+    </div>
+    <!-- Map Content -->
+    <div id="viewDiv"></div>
+    <!-- <div id="timeSlider"></div> -->
+    <!-- <div id="infoDiv" class="esri-widget">
+      <canvas id="fireChart" height="250" width="300" class="esri-widget"></canvas>
+    </div> -->
+    <!-- Start panel: layers -->
+    <calcite-shell-panel slot="panel-start" position="start" id="shell-panel-start" display-mode="dock" width-scale="m">
+      <calcite-tabs bordered layout="center" scale="m">
+        <!-- Title bar -->
+        <calcite-tab-nav slot="title-group">
+          <calcite-tab-title selected>
+            Roads
+          </calcite-tab-title>
+          <calcite-tab-title>Amenities</calcite-tab-title>
+          <calcite-tab-title>Demographics</calcite-tab-title>
+        </calcite-tab-nav>
+        <!-- Roads Lists -->
+        <calcite-tab selected>
+          <calcite-tree lines selection-mode="multiple">
+            <calcite-tree-item>
+              Safety Index
+              <calcite-tree slot="children" id="safety-index">
+                <calcite-tree-item expression="p_rank = '1' OR p_rank = '2' OR p_rank = '3' OR p_rank = '4' OR p_rank = '5'" selected>All
+                  Levels</calcite-tree-item>
+                <calcite-tree-item expression="p_rank = '1'">1</calcite-tree-item>
+                <calcite-tree-item expression="p_rank = '2'">2</calcite-tree-item>
+                <calcite-tree-item expression="p_rank = '3'">3</calcite-tree-item>
+                <calcite-tree-item expression="p_rank = '4'">4</calcite-tree-item>
+                <calcite-tree-item expression="p_rank = '5'">5</calcite-tree-item>
+              </calcite-tree>
+            </calcite-tree-item>
+            <calcite-tree-item>
+              Crashes Records (2014-2023)
+              <calcite-tree slot="children" id="Crashes-Records">
+                <calcite-tree-item expression="(VZ_PedCount>=0 OR VZ_BikeCount>=0)">All Crashes</calcite-tree-item>
+                <calcite-tree-item expression="VZ_PedCount>0">Pedestrians Involved</calcite-tree-item>
+                <calcite-tree-item expression="VZ_BikeCount>0">Bikes Involved</calcite-tree-item>
+                <calcite-tree-item expression="(VZ_PedCount=0 AND VZ_BikeCount=0)">Vehicles Only</calcite-tree-item>
+                <!-- <calcite-tree-item disabled></calcite-tree-item>
+                <calcite-tree-item><calcite-button id = "graph_button">Show Graph</calcite-button></calcite-tree-item> -->
+              </calcite-tree>
+            </calcite-tree-item>
+          </calcite-tree>
+        </calcite-tab>
+
+        <!-- Amenities List -->
+        <calcite-tab>
+          <calcite-tree lines selection-mode="multiple">
+            <calcite-tree-item>
+              Schools
+              <calcite-tree slot="children">
+                <calcite-tree-item>All Schools</calcite-tree-item>
+                <calcite-tree-item>Kindergartens</calcite-tree-item>
+                <calcite-tree-item>Primary/Middle/High Schools</calcite-tree-item>
+                <calcite-tree-item>Colleges</calcite-tree-item>
+                <calcite-tree-item>Universities</calcite-tree-item>
+              </calcite-tree>
+            </calcite-tree-item>
+          </calcite-tree>
+        </calcite-tab>
+
+        <!-- Demographics -->
+        <calcite-tab>
+          <calcite-tree lines selection-mode="multiple">
+            <calcite-tree-item>
+              Population (by age)
+              <calcite-tree slot="children">
+                <calcite-tree-item>All Ages</calcite-tree-item>
+                <calcite-tree-item>Under 18</calcite-tree-item>
+                <calcite-tree-item>18-34</calcite-tree-item>
+                <calcite-tree-item>35-54</calcite-tree-item>
+                <calcite-tree-item>55-65</calcite-tree-item>
+                <calcite-tree-item>Above 65</calcite-tree-item>
+              </calcite-tree>
+            </calcite-tree-item>
+        </calcite-tab>
+      </calcite-tabs>
+    </calcite-shell-panel>
+    <!-- End panel: for sidebar -->
+    <calcite-shell-panel slot="panel-end" position="end" id="shell-panel-end" collapsed>
+      <calcite-action-bar slot="action-bar" position="end" overlayPositioning="fixed">
+        <calcite-action data-action-id="basemaps" icon="basemap" text="Basemaps"></calcite-action>
+        <calcite-action data-action-id="legend" icon="legend" text="Legend"></calcite-action>
+        <calcite-action data-action-id="graph" icon="graph-bar" text="Graph"></calcite-action>
+        <calcite-action data-action-id="areaMeasurement" icon="measure-area" text="Measure-area"></calcite-action>
+        <calcite-action data-action-id="polygonSelection" icon="edit-geometry"
+          text="Select-by-Polygon"></calcite-action>
+        <calcite-action data-action-id="print" icon="print" text="Print"></calcite-action>
+        <calcite-action data-action-id="information" icon="information" text="Information"></calcite-action>
+
+        <!-- <calcite-action data-action-id="graph" icon="graph-bar" text = "Graph"></calcite-action> -->
+      </calcite-action-bar>
+
+      <calcite-panel heading="Basemaps" height-scale="l" data-panel-id="basemaps" hidden>
+        <div id="basemaps-container"></div>
+      </calcite-panel>
+      <calcite-panel heading="Legend" height-scale="l" data-panel-id="legend" hidden>
+        <div id="legend-container"></div>
+      </calcite-panel>
+      <calcite-panel heading="Graph" data-panel-id="graph" hidden>
+        <div id="graph-content">
+          <div id="monthDiv"></div><br />
+          <canvas id="CrashChart" height="350" width="300" class="esri-widget"></canvas>
+        </div>
+      </calcite-panel>
+      <calcite-panel heading="Area Measurement 2D" height-scale="l" data-panel-id="areaMeasurement" hidden>
+        <div id="measurement-container"></div>
+      </calcite-panel>
+      <calcite-panel heading="Select Features by Polygon" height-scale="l" data-panel-id="polygonSelection" hidden>
+        <div id="polygonSelection-container">
+          <br>
+          Select the layers to filter on:<br />
+          <input class="featureLayerViewFilter" type="checkbox" name = "safety-index"/> Roads<br />
+          <input class="featureLayerViewFilter" type="checkbox" name = "Crashes-Records"/> Crashes<br />
+          <button class="esri-button" id="drawPolygon" type="button" style="width: 60%;">
+            Draw a Polygon
+          </button>
+          <br>
+          <label for="relationship-select">Spatial relationship:</label>
+          <select id="relationship-select" class="options">
+            <option value="intersects" selected>intersects</option>
+            <option value="disjoint">disjoint</option>
+          </select>
+          <br>
+          <button class="esri-button" id="downloadFeatures" type="button" style="width: 60%;">
+            Export (GeoJSON)
+          </button>
+          <br>
+          <button class="esri-button" id="clearFilter" type="button" style="width: 60%;">
+            Clear filter
+          </button>
+        </div>
+      </calcite-panel>
+      <calcite-panel heading="Print" height-scale="l" data-panel-id="print" hidden>
+        <div id="print-container"></div>
+      </calcite-panel>
+      <!-- Info panel (populates with info from the web map) -->
+      <calcite-panel heading="Information" data-panel-id="information" hidden>
+        <div id="info-content">
+          <div id="item-description">
+            Instruction:
+          </div>
+        </div>
+      </calcite-panel>
+
+    </calcite-shell-panel>
+  </calcite-shell>
+
+</body>
+
+
+</html>
