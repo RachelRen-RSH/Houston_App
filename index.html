@@ -107,13 +107,13 @@
           <calcite-tree lines selection-mode="multiple">
             <calcite-tree-item>
               Population (by age)
-              <calcite-tree slot="children">
-                <calcite-tree-item>All Ages</calcite-tree-item>
-                <calcite-tree-item>Under 18</calcite-tree-item>
-                <calcite-tree-item>18-34</calcite-tree-item>
-                <calcite-tree-item>35-54</calcite-tree-item>
-                <calcite-tree-item>55-65</calcite-tree-item>
-                <calcite-tree-item>Above 65</calcite-tree-item>
+              <calcite-tree slot="children" id="age-population">
+                <calcite-tree-item expression="totpopE > 0">All Ages</calcite-tree-item>
+                <calcite-tree-item expression="under_18 > 0">Under 18</calcite-tree-item>
+                <calcite-tree-item expression="age18_34 > 0">18-34</calcite-tree-item>
+                <calcite-tree-item expression="age35_54 > 0">35-54</calcite-tree-item>
+                <calcite-tree-item expression="age55_65 > 0">55-65</calcite-tree-item>
+                <calcite-tree-item expression="age65_above > 0">Above 65</calcite-tree-item>
               </calcite-tree>
             </calcite-tree-item>
         </calcite-tab>

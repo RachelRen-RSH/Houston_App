@@ -59,13 +59,13 @@ require([
                 }
             }],
             expressionInfos: [
-            {
-                name: "local-count",
-                title: "local-count",
-                expression: `
+                {
+                    name: "local-count",
+                    title: "local-count",
+                    expression: `
                   Count(Filter($aggregatedFeatures, "Onsys_Fl ='N'"))
                 `
-            },
+                },
             ]
         },
         // clusterMinSize: "24px",
@@ -151,28 +151,28 @@ require([
                     stops: [
                         {
                             value: "5",
-                            color: "#850000ff", // will be assigned this color (beige)
-                            label: "5 - Most Dangerous" // label to display in the legend
+                            color: "#a63603ff", // will be assigned this color (beige)
+                            label: "5 - Highest Priority" // label to display in the legend
                         },
                         {
                             value: "4",
-                            color: "#d12020ff", // will be assigned this color (purple)
-                            label: "4 - Dangerous"
+                            color: "#e6550dff", // will be assigned this color (purple)
+                            label: "4 - High Priority"
                         },
                         {
                             value: "3",
-                            color: "#b89fa0ff", // will be assigned this color (purple)
+                            color: "#fd8d3cff", // will be assigned this color (purple)
                             label: "3 - Fair"
                         },
                         {
                             value: "2",
-                            color: "#8790bfff", // will be assigned this color (purple)
-                            label: "2 - Safe"
+                            color: "#fdbe85ff", // will be assigned this color (purple)
+                            label: "2 - Low Priority"
                         },
                         {
-                            value: "1", 
-                            color: "#50567aff", // will be assigned this color (purple)
-                            label: "1 - Safest" // label to display in the legend
+                            value: "1",
+                            color: "#feeddeff", // will be assigned this color (purple)
+                            label: "1 - Lowest Priority" // label to display in the legend
                         }
                     ]
                 }
@@ -195,14 +195,6 @@ require([
         popupTemplate: {
             title: "Crash {Crash_ID}",
             content: "Happened on {Street_Nbr} {Street_Name} on {Crash_Date}, {Day_of_Week}. <br> <a href='{street_view_url}' target='_blank'>Google Street View</a>",
-            // fieldInfos: [
-            //     {
-            //         fieldName: "time",
-            //         format: {
-            //             dateFormat: "short-date-short-time"
-            //         }
-            //     }
-            // ]
         },
         renderer: {
             type: "simple",
@@ -221,19 +213,60 @@ require([
         outFields: ["*"]
     });
 
+    var ageLayer = new GeoJSONLayer({
+        url: "data/city_demographics.geojson",
+        popupTemplate: {
+            title: "{NAME.x}",  // Assuming 'NAME' is the field for the area name
+            content: [
+                {
+                    type: "text",
+                    text: "Total Population (per Sq Mile): {expression/per-sq-mile}"  // Use an expression to calculate density
+                }
+            ],
+            expressionInfos: [{
+                name: "per-sq-mile",
+                title: "Population per Square Mile",
+                expression: "Round($feature.age_totE / $feature.area, 2)"  // Adjust field names as necessary and round the result
+            }]
+        },
+        renderer: {
+            type: "simple", // Use a simple renderer for single-symbol styling with visual variables
+            symbol: {
+                type: "simple-fill", // Use a simple-fill symbol for polygon data
+                outline: { color: "black", width: 0 }
+            },
+            visualVariables: [{
+                type: "color",
+                field: "totpopE",
+                normalizationField: "area",
+                stops: [
+                    { value: 0, color: "#cececeff" },
+                    { value: 10000, color: "#404040ff" }  // Adjust these values according to your data's range
+                ],
+                legendOptions: {
+                    title: "Total Population / sq mile"
+                }
+            }]
+        },
+        visible: false,
+        outFields: ["*"]
+    })
+
     const tree_with_layer = {
         "safety-index": roadLayer,
-        "Crashes-Records": crashLayer // Ensure this ID matches your HTML
+        "Crashes-Records": crashLayer, // Ensure this ID matches your HTML
+        "age-population": ageLayer
     };
 
     var layerExpressions = {
         "safety-index": "",
-        "Crashes-Records": ""
+        "Crashes-Records": "",
+        "age-population": ""
     };
 
     var map = new Map({
         basemap: "gray",
-        layers: [roadLayer, crashLayer]
+        layers: [ageLayer, roadLayer, crashLayer]
     });
 
 
@@ -422,15 +455,15 @@ require([
 
     function removeLayerView(layerName) {
         if (layerViews[layerName]) {
-            layerViews[layerName].filter.geometry = null; 
+            layerViews[layerName].filter.geometry = null;
             layerViews[layerName].filter.spatialRelationship = "intersects";// Remove the layer view entry
             delete layerViews[layerName];
             console.log(`LayerView for ${layerName} removed.`);
-            console.log("left layerView is "+ layerViews.length);
+            console.log("left layerView is " + layerViews.length);
             //updateFilter();
         }
     }
-    
+
 
     function clearFilter() {
         Object.values(layerViews).forEach(layerView => {
@@ -443,16 +476,16 @@ require([
         sketchGeometry = null;
         console.log("Filters cleared for all layers.");
     }
-    
+
 
     function updateFilter() {
-        
+
         Object.values(layerViews).forEach(layerView => {
-            console.log("update filter output: "+layerView.layer.title)
-;            if (layerView.filter) {
-                layerView.filter.geometry = sketchGeometry;
-                layerView.filter.spatialRelationship = selectedFilter;
-            } else {
+            console.log("update filter output: " + layerView.layer.title)
+                ; if (layerView.filter) {
+                    layerView.filter.geometry = sketchGeometry;
+                    layerView.filter.spatialRelationship = selectedFilter;
+                } else {
                 layerView.filter = {
                     geometry: sketchGeometry,
                     spatialRelationship: selectedFilter
@@ -466,28 +499,28 @@ require([
         checkbox.addEventListener('change', (e) => {
             const layerName = e.target.name;
             const layer = tree_with_layer[layerName];
-    
+
             console.log("Checkbox change for", layer.title, ":", e.target.checked);
-            
+
             view.whenLayerView(layer).then(layerView => {
                 storeLayerView(layerName, layerView);
                 if (e.target.checked && layer.visible) {
                     updateFilter();  // Apply the filter to all stored LayerViews
-                } else if(e.target.checked == false && layer.visible){
+                } else if (e.target.checked == false && layer.visible) {
                     console.log("ehrcunwheriucnwehfiunw")
                     removeLayerView(layerName);
                     //clearFilter();  // Clear the filter from all stored LayerViews
                 }
-                else{
+                else {
                     clearFilter();
                 }
             }).catch(console.error);
         });
     });
 
-    document.getElementById("downloadFeatures").addEventListener("click", function() {
+    document.getElementById("downloadFeatures").addEventListener("click", function () {
         Object.values(layerViews).forEach(layerView => {
-            console.log("update filter output: "+layerView.layer.title)
+            console.log("update filter output: " + layerView.layer.title)
             downloadFeatures(layerView);
         });
     });
@@ -498,16 +531,16 @@ require([
             console.error("LayerView not provided");
             return;
         }
-    
+
         const query = layerView.layer.createQuery();
         query.where = layerView.filter.where;
         query.geometry = layerView.filter.geometry;
         query.spatialRelationship = layerView.filter.spatialRelationship;
         query.outFields = ["*"]; // Adjust as necessary for your application
         query.returnGeometry = true;
-    
-        layerView.layer.queryFeatures(query).then(function(results) {
-            console.log("Length of features to download is "+ results.features.length);
+
+        layerView.layer.queryFeatures(query).then(function (results) {
+            console.log("Length of features to download is " + results.features.length);
             const geoJson = convertFeaturesToGeoJSON(results.features);
             downloadGeoJSON(geoJson, "extracted_features.geojson");
         }).catch(console.error);
@@ -530,13 +563,13 @@ require([
     function downloadGeoJSON(geoJson, filename) {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(geoJson));
         const downloadAnchorNode = document.createElement('a');
-        downloadAnchorNode.setAttribute("href",     dataStr);
+        downloadAnchorNode.setAttribute("href", dataStr);
         downloadAnchorNode.setAttribute("download", filename);
         document.body.appendChild(downloadAnchorNode); // Required for Firefox
         downloadAnchorNode.click();
         downloadAnchorNode.remove();
     }
-    
+
     ///////////////////////////////////////////////// define chart ///////////////////////////////////
 
     let chart;
@@ -577,7 +610,7 @@ require([
         chart = new Chart(ctx, {
             type: "bar",
             data: {
-                labels: [ "Possible Injury", "Unknown Injury","Serious Injury", "Fatality"],
+                labels: ["Possible Injury", "Unknown Injury", "Serious Injury", "Fatality"],
                 datasets: [{
                     label: ["Count"],
                     backgroundColor: [
@@ -667,7 +700,7 @@ require([
         const statsQuery = query.clone();
 
         const statDefinitions = [
-            
+
             {
                 onStatisticField: "Poss_Injry_Cnt",
                 outStatisticFieldName: "poss_injuries",
@@ -851,7 +884,7 @@ require([
                         });
                     });
                 }
-                if(sketchGeometry!=null){
+                if (sketchGeometry != null) {
                     updateFilter();
                 }
             } else {
