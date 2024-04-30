@@ -209,8 +209,52 @@ require([
             }
         },
         popupTemplate: {
-            title: "Crash {Crash_ID}",
-            content: "Happened on {Street_Nbr} {Street_Name} on {Crash_Date}, {Day_of_Week}. <br> <a href='{street_view_url}' target='_blank'>Google Street View</a>",
+            title: "Crash {Crash_ID} happened on {Street_Nbr} {Street_Name} on {Crash_Date}, {Day_of_Week}. <br> <a href='{street_view_url}' target='_blank'>Google Street View</a>",
+            content:[{
+                type: "fields",
+                    fieldInfos: [
+                        {
+                            fieldName: "Crash_Fatal_Fl",
+                            label: "Fatal Crash"
+                        },
+                        {
+                            fieldName: "Tot_Injry_Cnt",
+                            label: "Total Injuries"
+                        },
+                        {
+                            fieldName: "Death_Cnt",
+                            label: "Total Fatalities"
+                        },
+                        {
+                            fieldName: "VZ_PedCount",
+                            label: "Number of Pedestrians Involved"
+                        },
+                        {
+                            fieldName: "VZ_BikeCount",
+                            label: "Number of Bicyclist Involved"
+                        },
+                        {
+                            fieldName: "Active_School_Zone_Fl",
+                            label: "Crash in Active School Zone",
+                        },
+                        {
+                            fieldName: "Rpt_Street_Desc",
+                            label: "Street Description"
+                        },
+                        {
+                            fieldName: "Road_Constr_Zone_Fl",
+                            label: "Construction Zone",
+                        },
+                        {
+                            fieldName: "ADT",
+                            label: "Average Daily Traffic",
+                        },
+                        {
+                            fieldName: "SrfWdth",
+                            label: "Road Surface Width",
+                        },
+                    ]
+        }]
         },
         renderer: {
             type: "simple",
