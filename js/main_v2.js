@@ -118,7 +118,7 @@ require([
         url: "data/combined_road.geojson",
         title: "Roads",
         popupTemplate: {
-            title: "{Full_Name}",
+            title: "{Full_Name} -- Rank {p_rank}",
             content: [
                 {
                     type: "fields",
@@ -130,6 +130,22 @@ require([
                         {
                             fieldName: "OneWay",
                             label: "One Way",
+                        },
+                        {
+                            fieldName: "orinttn",
+                            label: "Orientation"
+                        },
+                        {
+                            fieldName: "POSTEDSPEE",
+                            label: "Speed Limit",
+                        },
+                        {
+                            fieldName: "ADT",
+                            label: "Average Daily Traffic",
+                        },
+                        {
+                            fieldName: "SrfWdth",
+                            label: "Road Surface Width",
                         },
                     ]
                 }
