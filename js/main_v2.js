@@ -697,7 +697,7 @@ require([
         });
     });
 
-
+    // For demographics layer
     function updateLayerExpression(tree) {
         const layer = tree_with_layer[tree.id];
         if (!layer) {
@@ -709,30 +709,56 @@ require([
         const fields = Array.from(selectedDemoItems).map(item => `$feature.${item.getAttribute('field')}`)
 
         let fields_combined = fields.join(' + ');
+        let popupName = "Population per Square Mile";
+        let popupExpression = "Round($feature.age_totE / $feature.area, 0)";
+        
 
         if (fields.includes("$feature.age_totE")) {
             layer.visible = true;
         }
         else {
-            if(fields.includes("$feature.veh_totE")){
-                fields_combined = "$feature.veh_totE";
+            if (fields_combined.includes('veh')) {
+                if (fields.includes("$feature.veh_totE")) {
+                    fields_combined = "$feature.veh_totE";
+                }
+                popupName = "Car Ownership per Square Mile";
+                popupExpression = "Round(("+fields_combined+") / $feature.area, 0)";
             }
-            else if(fields.includes("$feature.com_totE")){
-                fields_combined = "$feature.com_totE";
+            else if (fields_combined.includes('com')) {
+                if (fields.includes("$feature.com_totE")) {
+                    fields_combined = "$feature.com_totE";
+                }
+                popupName = "Commuters per Square Mile";
+                popupExpression = "Round(("+fields_combined+") / $feature.area, 0)";
             }
-            const newRenderer = layer.renderer.clone();
-            newRenderer.visualVariables = [{
-                type: "color",
-                valueExpression: fields_combined,
-                normalizationField: "area",
-                stops: [
-                    { value: 0, color: "#cececeff" },
-                    { value: 10000, color: "#404040ff" }
-                ],
-            }];
-            layer.renderer = newRenderer;
-            layer.visible = true;
         }
+        console.log(popupExpression);
+        const newRenderer = layer.renderer.clone();
+        newRenderer.visualVariables = [{
+            type: "color",
+            valueExpression: fields_combined,
+            normalizationField: "area",
+            stops: [
+                { value: 0, color: "#cececeff" },
+                { value: 10000, color: "#404040ff" }
+            ],
+        }];
+        layer.renderer = newRenderer;
+        const newPopupTemplate = layer.popupTemplate.clone();
+        newPopupTemplate.expressionInfos = [{
+            name: "per-sq-mile",
+            title: popupName,
+            expression: popupExpression,
+        }]
+        newPopupTemplate.content = [
+            {
+                type: "text",
+                text: popupName+": {expression/per-sq-mile}"  // Use an expression to calculate density
+            }
+        ],
+        layer.popupTemplate = newPopupTemplate;
+        layer.visible = true;
+        console.log("fields-combined: " + fields_combined)
         if (fields.length == 0) {
             layer.visible = false;
         }
