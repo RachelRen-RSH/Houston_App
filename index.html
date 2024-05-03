@@ -65,7 +65,7 @@
         </calcite-tab-nav>
         <!-- Roads Lists -->
         <calcite-tab selected>
-          <calcite-tree lines selection-mode="multiple">
+          <calcite-tree lines selection-mode="multiple" id = "roads">
             <calcite-tree-item>
               Safety Index
               <calcite-tree slot="children" id="safety-index">
@@ -94,7 +94,7 @@
 
         <!-- Amenities List -->
         <calcite-tab>
-          <calcite-tree lines selection-mode="multiple">
+          <calcite-tree lines selection-mode="multiple"  id = "amenities">
             <calcite-tree-item>
               Schools
               <calcite-tree slot="children">
@@ -110,16 +110,38 @@
 
         <!-- Demographics -->
         <calcite-tab>
-          <calcite-tree lines selection-mode="multiple">
+          <calcite-tree lines selection-mode="multiple"  id = "demographics">
             <calcite-tree-item>
               Population (by age)
               <calcite-tree slot="children" id="age-population">
-                <calcite-tree-item expression="totpopE > 0">All Ages</calcite-tree-item>
-                <calcite-tree-item expression="under_18 > 0">Under 18</calcite-tree-item>
-                <calcite-tree-item expression="age18_34 > 0">18-34</calcite-tree-item>
-                <calcite-tree-item expression="age35_54 > 0">35-54</calcite-tree-item>
-                <calcite-tree-item expression="age55_65 > 0">55-65</calcite-tree-item>
-                <calcite-tree-item expression="age65_above > 0">Above 65</calcite-tree-item>
+                <calcite-tree-item field = "age_totE">All Ages</calcite-tree-item>
+                <calcite-tree-item field = "under_18">Under 18</calcite-tree-item>
+                <calcite-tree-item field = "age18_34">18-34</calcite-tree-item>
+                <calcite-tree-item field = "age35_54">35-54</calcite-tree-item>
+                <calcite-tree-item field = "age55_65">55-65</calcite-tree-item>
+                <calcite-tree-item field = "age65_above">Above 65</calcite-tree-item>
+              </calcite-tree>
+            </calcite-tree-item>
+            <calcite-tree-item>
+              Vehicles Ownership
+              <calcite-tree slot="children" id="vehicle-ownership">
+                <calcite-tree-item field = "veh_totE">All</calcite-tree-item>
+                <calcite-tree-item field = "veh_noneE">No vehicles</calcite-tree-item>
+                <calcite-tree-item field = "veh_oneE">One vehicle</calcite-tree-item>
+                <calcite-tree-item field = "veh_twoE">Two vehicles</calcite-tree-item>
+                <calcite-tree-item field = "veh_threeplusE">More than three vehicles</calcite-tree-item>
+              </calcite-tree>
+            </calcite-tree-item>
+            <calcite-tree-item>
+              Commuters Type
+              <calcite-tree slot="children" id="commuters-type">
+                <calcite-tree-item field = "com_totE">All Types</calcite-tree-item>
+                <calcite-tree-item field = "com_drivealoneE">Drive alone</calcite-tree-item>
+                <calcite-tree-item field = "com_carpoolE">Carpool</calcite-tree-item>
+                <calcite-tree-item field = "com_transitE">Public transit</calcite-tree-item>
+                <calcite-tree-item field = "com_walkE">Walk</calcite-tree-item>
+                <calcite-tree-item field = "com_wfhE">Work from home</calcite-tree-item>
+                <calcite-tree-item field = "com_otherE">Others</calcite-tree-item>
               </calcite-tree>
             </calcite-tree-item>
         </calcite-tab>

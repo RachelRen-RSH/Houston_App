@@ -30,8 +30,9 @@ require([
     "esri/core/lang",
     "esri/core/promiseUtils",
     "esri/core/reactiveUtils",
-    "esri/geometry/geometryEngine"
-], function (Map, MapView, GeoJSONLayer, GraphicsLayer, BasemapGallery, Legend, AreaMeasurement2D, SketchViewModel, Print, Search, ScaleBar, TimeSlider, FeatureFilter, clusterLabelCreator, lang, promiseUtils, reactiveUtils, geometryEngine) {
+    "esri/geometry/geometryEngine",
+    "esri/popup/content/LineChartMediaInfo"
+], function (Map, MapView, GeoJSONLayer, GraphicsLayer, BasemapGallery, Legend, AreaMeasurement2D, SketchViewModel, Print, Search, ScaleBar, TimeSlider, FeatureFilter, clusterLabelCreator, lang, promiseUtils, reactiveUtils, geometryEngine, LineChartMediaInfo) {
     // Add layers to the map
     // Define the bin map of the crash layer
     // Esri color ramps - Esri Yellow and Green 1
@@ -114,17 +115,32 @@ require([
         }]
     };
 
+
     var roadLayer = new GeoJSONLayer({
-        url: "data/combined_road.geojson",
+        url: "data/Houston_road.geojson",
         title: "Roads",
         popupTemplate: {
-            title: "{Full_Name} -- Rank {p_rank}",
+            title: "{Full_Nm_x} -- Rank {p_rank}",
             content: [
+                {
+                    type: "media",
+
+                    mediaInfos: [{
+                        type: "line-chart",
+                        title: "Total Number of crashes between 2014 and 2023",
+                        value: {
+                            fields: ["crs__14", "crs__15", "crs__16", "crs__17", "crs__18", "crs__19", "crs__20", "crs__21", "crs__22", "crs__23"],
+                            // Set the colors array to various shades of green since the chart represents income.
+                            colors: "#598c58"
+                        }
+                    }
+                    ]
+                },
                 {
                     type: "fields",
                     fieldInfos: [
                         {
-                            fieldName: "ROAD_CL.x",
+                            fieldName: "ROAD_CL",
                             label: "Road Class"
                         },
                         {
@@ -140,12 +156,24 @@ require([
                             label: "Speed Limit",
                         },
                         {
+                            fieldName: "PERCENTILE",
+                            label: "80% Driver's Average Speed",
+                        },
+                        {
                             fieldName: "ADT",
                             label: "Average Daily Traffic",
                         },
                         {
                             fieldName: "SrfWdth",
                             label: "Road Surface Width",
+                        },
+                        {
+                            fieldName: "TtlSrIn",
+                            label: "Total Serious Injuries in Crash",
+                        },
+                        {
+                            fieldName: "TotlDth",
+                            label: "Total Fatalities in Crash",
                         },
                     ]
                 }
@@ -182,12 +210,12 @@ require([
                         },
                         {
                             value: "2",
-                            color: "#fdbe85ff", // will be assigned this color (purple)
+                            color: "#b49fbcff", // will be assigned this color (purple)
                             label: "2 - Low Priority"
                         },
                         {
                             value: "1",
-                            color: "#feeddeff", // will be assigned this color (purple)
+                            color: "#84628bff", // will be assigned this color (purple)
                             label: "1 - Lowest Priority" // label to display in the legend
                         }
                     ]
@@ -210,51 +238,51 @@ require([
         },
         popupTemplate: {
             title: "Crash {Crash_ID} happened on {Street_Nbr} {Street_Name} on {Crash_Date}, {Day_of_Week}. <br> <a href='{street_view_url}' target='_blank'>Google Street View</a>",
-            content:[{
+            content: [{
                 type: "fields",
-                    fieldInfos: [
-                        {
-                            fieldName: "Crash_Fatal_Fl",
-                            label: "Fatal Crash"
-                        },
-                        {
-                            fieldName: "Tot_Injry_Cnt",
-                            label: "Total Injuries"
-                        },
-                        {
-                            fieldName: "Death_Cnt",
-                            label: "Total Fatalities"
-                        },
-                        {
-                            fieldName: "VZ_PedCount",
-                            label: "Number of Pedestrians Involved"
-                        },
-                        {
-                            fieldName: "VZ_BikeCount",
-                            label: "Number of Bicyclist Involved"
-                        },
-                        {
-                            fieldName: "Active_School_Zone_Fl",
-                            label: "Crash in Active School Zone",
-                        },
-                        {
-                            fieldName: "Rpt_Street_Desc",
-                            label: "Street Description"
-                        },
-                        {
-                            fieldName: "Road_Constr_Zone_Fl",
-                            label: "Construction Zone",
-                        },
-                        {
-                            fieldName: "ADT",
-                            label: "Average Daily Traffic",
-                        },
-                        {
-                            fieldName: "SrfWdth",
-                            label: "Road Surface Width",
-                        },
-                    ]
-        }]
+                fieldInfos: [
+                    {
+                        fieldName: "Crash_Fatal_Fl",
+                        label: "Fatal Crash"
+                    },
+                    {
+                        fieldName: "Tot_Injry_Cnt",
+                        label: "Total Injuries"
+                    },
+                    {
+                        fieldName: "Death_Cnt",
+                        label: "Total Fatalities"
+                    },
+                    {
+                        fieldName: "VZ_PedCount",
+                        label: "Number of Pedestrians Involved"
+                    },
+                    {
+                        fieldName: "VZ_BikeCount",
+                        label: "Number of Bicyclist Involved"
+                    },
+                    {
+                        fieldName: "Active_School_Zone_Fl",
+                        label: "Crash in Active School Zone",
+                    },
+                    {
+                        fieldName: "Rpt_Street_Desc",
+                        label: "Street Description"
+                    },
+                    {
+                        fieldName: "Road_Constr_Zone_Fl",
+                        label: "Construction Zone",
+                    },
+                    {
+                        fieldName: "ADT",
+                        label: "Average Daily Traffic",
+                    },
+                    {
+                        fieldName: "SrfWdth",
+                        label: "Road Surface Width",
+                    },
+                ]
+            }]
         },
         renderer: {
             type: "simple",
@@ -273,8 +301,9 @@ require([
         outFields: ["*"]
     });
 
-    var ageLayer = new GeoJSONLayer({
+    var demoLayer = new GeoJSONLayer({
         url: "data/city_demographics.geojson",
+        title: "Demographics",
         popupTemplate: {
             title: "{NAME.x}",  // Assuming 'NAME' is the field for the area name
             content: [
@@ -315,18 +344,23 @@ require([
     const tree_with_layer = {
         "safety-index": roadLayer,
         "Crashes-Records": crashLayer, // Ensure this ID matches your HTML
-        "age-population": ageLayer
+        "age-population": demoLayer,
+        "vehicle-ownership": demoLayer,
+        "commuters-type": demoLayer,
+
     };
 
     var layerExpressions = {
         "safety-index": "",
         "Crashes-Records": "",
-        "age-population": ""
+        "age-population": "",
+        "vehicle-ownership": "",
+        "commuters-type": "",
     };
 
     var map = new Map({
         basemap: "gray",
-        layers: [ageLayer, roadLayer, crashLayer]
+        layers: [demoLayer, roadLayer, crashLayer]
     });
 
 
@@ -649,16 +683,60 @@ require([
                 } else {
                     e.target.setAttribute('selected', '');
                 }
-
-                // Re-apply filters based on new selection state
-                currentExpression = getCombinedExpression(tree, tree.id);
-                applyFiltersBasedOnSelection(tree);
+                if (tree.parentElement.parentElement.id == "roads" || tree.parentElement.parentElement.id == "amenities") {
+                    // Re-apply filters based on new selection state
+                    currentExpression = getCombinedExpression(tree, tree.id);
+                    applyFiltersBasedOnSelection(tree);
+                }
+                else {
+                    console.log(tree.id);
+                    //const selectedItems = tree.selectedItems; // Get all selected items
+                    updateLayerExpression(tree);
+                }
             });
         });
     });
 
 
+    function updateLayerExpression(tree) {
+        const layer = tree_with_layer[tree.id];
+        if (!layer) {
+            console.error("Layer not found for tree:", tree.id);
+            return;
+        }
 
+        const selectedDemoItems = tree.querySelectorAll('calcite-tree-item[selected]');
+        const fields = Array.from(selectedDemoItems).map(item => `$feature.${item.getAttribute('field')}`)
+
+        let fields_combined = fields.join(' + ');
+
+        if (fields.includes("$feature.age_totE")) {
+            layer.visible = true;
+        }
+        else {
+            if(fields.includes("$feature.veh_totE")){
+                fields_combined = "$feature.veh_totE";
+            }
+            else if(fields.includes("$feature.com_totE")){
+                fields_combined = "$feature.com_totE";
+            }
+            const newRenderer = layer.renderer.clone();
+            newRenderer.visualVariables = [{
+                type: "color",
+                valueExpression: fields_combined,
+                normalizationField: "area",
+                stops: [
+                    { value: 0, color: "#cececeff" },
+                    { value: 10000, color: "#404040ff" }
+                ],
+            }];
+            layer.renderer = newRenderer;
+            layer.visible = true;
+        }
+        if (fields.length == 0) {
+            layer.visible = false;
+        }
+    }
 
     function initializeChart() {
         if (chart) {
