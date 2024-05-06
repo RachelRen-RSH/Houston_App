@@ -76,7 +76,7 @@ require([
             symbol: {
                 type: "simple-marker",
                 style: "circle",
-                color: "#007f99",
+                color: "#102444",
                 size: 24,
                 outline: {
                     color: "#ebe6df",
@@ -195,27 +195,27 @@ require([
                     stops: [
                         {
                             value: "5",
-                            color: "#a63603ff", // will be assigned this color (beige)
+                            color: "#A50104", // will be assigned this color (beige)
                             label: "5 - Highest Priority" // label to display in the legend
                         },
                         {
                             value: "4",
-                            color: "#e6550dff", // will be assigned this color (purple)
+                            color: "#F26419", // will be assigned this color (purple)
                             label: "4 - High Priority"
                         },
                         {
                             value: "3",
-                            color: "#fd8d3cff", // will be assigned this color (purple)
+                            color: "#8AAA79", // will be assigned this color (purple)
                             label: "3 - Fair"
                         },
                         {
                             value: "2",
-                            color: "#b49fbcff", // will be assigned this color (purple)
+                            color: "#283D3B", // will be assigned this color (purple)
                             label: "2 - Low Priority"
                         },
                         {
                             value: "1",
-                            color: "#84628bff", // will be assigned this color (purple)
+                            color: "#55B0E0", // will be assigned this color (purple)
                             label: "1 - Lowest Priority" // label to display in the legend
                         }
                     ]
@@ -226,7 +226,7 @@ require([
     });
 
     var crashLayer = new GeoJSONLayer({
-        url: "data/crash14_23_streetview.geojson",
+        url: "data/local_crash14_23_streetview.geojson",
         title: "Crashes (2014-2023)",
         featureReduction: clusterConfig,
         timeInfo: {
@@ -290,7 +290,7 @@ require([
             symbol: {
                 type: "simple-marker",
                 size: 4,
-                color: "#69dcff",
+                color: "#102444",
                 outline: {
                     color: "rgba(0, 139, 174, 0.5)",
                     width: 5
@@ -417,6 +417,12 @@ require([
     const panel = document.getElementById("basemaps-container");
     const shellPanel = document.getElementById("shell-panel-end");
     const actions = shellPanel?.querySelectorAll("calcite-action");
+
+    let chart;
+    let highlightHandle = null;
+    let crashLayerView = null;
+    let combinedExpression = "";
+    initializeChart();
 
     panel?.addEventListener("calcitePanelClose", function (event) {
         actions?.forEach(action => (action.active = false));
@@ -636,7 +642,9 @@ require([
         layerView.layer.queryFeatures(query).then(function (results) {
             console.log("Length of features to download is " + results.features.length);
             const geoJson = convertFeaturesToGeoJSON(results.features);
-            downloadGeoJSON(geoJson, "extracted_features.geojson");
+            const layerName = layerView.layer.title + '_extracted'; // Adjust '.title' if necessary
+            const safeLayerName = layerName.replace(/[\W_]+/g, '_'); // Sanitize to ensure a valid file name
+            downloadGeoJSON(geoJson, `${safeLayerName}.geojson`);
         }).catch(console.error);
     }
 
@@ -666,11 +674,7 @@ require([
 
     ///////////////////////////////////////////////// define chart ///////////////////////////////////
 
-    let chart;
-    let highlightHandle = null;
-    let crashLayerView = null;
-    let combinedExpression = "";
-    initializeChart();
+    
 
     document.querySelectorAll('calcite-tree[slot="children"]').forEach(tree => {
         tree.querySelectorAll('calcite-tree-item').forEach(item => {
@@ -698,7 +702,7 @@ require([
     });
 
     // For demographics layer
-    function updateLayerExpression(tree) {
+    function updateLayerExpression(tree) { 
         const layer = tree_with_layer[tree.id];
         if (!layer) {
             console.error("Layer not found for tree:", tree.id);
@@ -1000,7 +1004,7 @@ require([
                         };
                         timeSlider.timeExtent = {
                             start: start,
-                            end: crashLayer.timeInfo.fullTimeExtent.end
+                            end: end
                         };
                     };
                     setupTimeSlider();
