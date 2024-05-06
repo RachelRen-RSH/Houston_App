@@ -51,7 +51,7 @@ require([
         // Talk to modeling person to see what else important information to add in the popup window.
         popupTemplate: {
             title: "Crash Cluster summary",
-            content: "This cluster represents <b>{cluster_count}</b> crashes. <br><b>{expression/local-count}</b> of them happened on city-owned local roads.",
+            content: "This cluster represents <b>{cluster_count}</b> crashes. <br><b>{expression/severity}</b> of them have high severity, and <br><b>{expression/intersection}</b> of them happened on road intersections.",
             fieldInfos: [{
                 fieldName: "cluster_count",
                 format: {
@@ -61,13 +61,20 @@ require([
             }],
             expressionInfos: [
                 {
-                    name: "local-count",
-                    title: "local-count",
+                    name: "severity",
+                    title: "severity",
                     expression: `
-                  Count(Filter($aggregatedFeatures, "Onsys_Fl ='N'"))
-                `
+                        Count(Filter($aggregatedFeatures, "Crash_Sev_ID ='4'"))
+                    `
                 },
-            ]
+                {
+                    name: "intersection",
+                    title: "intersection",
+                    expression: `
+                        Count(Filter($aggregatedFeatures, "Intrsct_Relat_ID ='1' OR Intrsct_Relat_ID ='2'"))
+                    `
+                },
+            ]            
         },
         // clusterMinSize: "24px",
         // clusterMaxSize: "60px",
@@ -117,7 +124,7 @@ require([
 
 
     var roadLayer = new GeoJSONLayer({
-        url: "data/Houston_road.geojson",
+        url: "data/combined_road_new.geojson",
         title: "Roads",
         popupTemplate: {
             title: "{Full_Nm_x} -- Rank {p_rank}",
@@ -140,15 +147,15 @@ require([
                     type: "fields",
                     fieldInfos: [
                         {
-                            fieldName: "ROAD_CL",
+                            fieldName: "ROAD_CL.x",
                             label: "Road Class"
                         },
                         {
-                            fieldName: "OneWay",
+                            fieldName: "OneWay.x",
                             label: "One Way",
                         },
                         {
-                            fieldName: "orinttn",
+                            fieldName: "orinttn.x",
                             label: "Orientation"
                         },
                         {
@@ -166,6 +173,14 @@ require([
                         {
                             fieldName: "SrfWdth",
                             label: "Road Surface Width",
+                        },
+                        {
+                            fieldName: "Busstop",
+                            label: "Number of Bus Stops",
+                        },
+                        {
+                            fieldName: "Bikelane",
+                            label: "Number of Bike Lanes",
                         },
                         {
                             fieldName: "TtlSrIn",
