@@ -24,14 +24,19 @@
     <div slot="header" id="modal-title">
       Welcome to the City of Houston Vision-Zero Planning Information System
     </div>
-    <div slot="content">
-      Introduction: <br>The City of Houston Department of Public Works is seeking to enhance their capability to prioritize safety 
-      interventions on roads under their jurisdiction through the development of a proof-of-concept data interface. This interface
-       aims to consolidate disparate data sources and introduce new risk analytics to aid in decision-making processes 
-       concerning road safety.</br> The primary purpose of the dashboard is to provide a centralized and efficient data 
-       interface that allows the client to access, visualize, and analyze critical data for effective safety management. 
-       This tool will support the Department of Public Works (DPW) in making informed decisions regarding safety improvements, 
-       signal enhancements, crash investigations, and Vision Zero interventions. <br> <br> <br>Instruction: </br>
+    <div slot="content" class="scrollable-content">
+      <span style="font-weight: bold; font-size: larger; color: black;">Introduction:</span> <br>
+      This web application is developed for the City of Houston Department of Public Works to enhance their capability to prioritize safety 
+      interventions on roads under their jurisdiction. This interface
+       aims to consolidate disparate data sources, including both multi-model transportation features and socio-demographic characteristics, and introduce new risk analytics to aid in decision-making processes 
+       concerning road safety.
+       <br> <br> <span style="font-weight: bold; font-size: larger; color: black;">Instruction:</span><br>
+       <span style="color: black;">- Left function bar:</span> <br>This bar contains all the layers categorized by road and demographic features. The drop down button for each map layer provideds multi-selection for filtering the data. For roads layer, 
+       its popup-window includes a trend graph of total number of crashes happened on this road. The crash data is aggregated by circles in
+       proportional sizes, with a slider on the bottom left to query the time of the crashes. When clicking crashes, the popup-window will show with a yellow polygon, indicating the total number of crashes within this area. When zooming in the map, the aggregated
+       circle will be split into individual points, indicating a single crash point. The popup window includes the basic information of the crashes and a Google Street View link. <br><br>
+       <span style="color: black;">- Right function bar:</span> This bar contains functions related with visualizing and analyzing. Besides changing basemaps and showing the legends, Craph button shows the detailed number of injuries and fatalities in crashes.
+       Users can also extract features through Select-by-Polygon with their own defined area-of-interest, which will query all the shown layers on the map with a spatial relationship and export these features into GeoJson format.
     </div>
     <calcite-button id="go_to_app" slot="primary" width="full">
       Go to the Application
@@ -60,7 +65,7 @@
           <calcite-tab-title selected>
             Roads
           </calcite-tab-title>
-          <calcite-tab-title>Amenities</calcite-tab-title>
+          <!-- <calcite-tab-title>Amenities</calcite-tab-title> -->
           <calcite-tab-title>Demographics</calcite-tab-title>
         </calcite-tab-nav>
         <!-- Roads Lists -->
@@ -69,13 +74,13 @@
             <calcite-tree-item>
               Safety Index
               <calcite-tree slot="children" id="safety-index">
-                <calcite-tree-item expression="p_rank = '1' OR p_rank = '2' OR p_rank = '3' OR p_rank = '4' OR p_rank = '5'" selected>All
+                <calcite-tree-item expression="Safety_Index IS NOT NULL" selected>All
                   Levels</calcite-tree-item>
-                <calcite-tree-item expression="p_rank = '1'">1</calcite-tree-item>
-                <calcite-tree-item expression="p_rank = '2'">2</calcite-tree-item>
-                <calcite-tree-item expression="p_rank = '3'">3</calcite-tree-item>
-                <calcite-tree-item expression="p_rank = '4'">4</calcite-tree-item>
-                <calcite-tree-item expression="p_rank = '5'">5</calcite-tree-item>
+                <calcite-tree-item expression="Safety_Index = 1">1</calcite-tree-item>
+                <calcite-tree-item expression="Safety_Index = 2">2</calcite-tree-item>
+                <calcite-tree-item expression="Safety_Index = 3">3</calcite-tree-item>
+                <calcite-tree-item expression="Safety_Index = 4">4</calcite-tree-item>
+                <calcite-tree-item expression="Safety_Index = 5">5</calcite-tree-item>
               </calcite-tree>
             </calcite-tree-item>
             <calcite-tree-item>
@@ -85,24 +90,15 @@
                 <calcite-tree-item expression="VZ_PedCount>0">Pedestrians Involved</calcite-tree-item>
                 <calcite-tree-item expression="VZ_BikeCount>0">Bikes Involved</calcite-tree-item>
                 <calcite-tree-item expression="(VZ_PedCount=0 AND VZ_BikeCount=0)">Vehicles Only</calcite-tree-item>
-                <!-- <calcite-tree-item disabled></calcite-tree-item>
-                <calcite-tree-item><calcite-button id = "graph_button">Show Graph</calcite-button></calcite-tree-item> -->
               </calcite-tree>
             </calcite-tree-item>
-          </calcite-tree>
-        </calcite-tab>
-
-        <!-- Amenities List -->
-        <calcite-tab>
-          <calcite-tree lines selection-mode="multiple"  id = "amenities">
             <calcite-tree-item>
-              Schools
-              <calcite-tree slot="children">
-                <calcite-tree-item>All Schools</calcite-tree-item>
-                <calcite-tree-item>Kindergartens</calcite-tree-item>
-                <calcite-tree-item>Primary/Middle/High Schools</calcite-tree-item>
-                <calcite-tree-item>Colleges</calcite-tree-item>
-                <calcite-tree-item>Universities</calcite-tree-item>
+              Bike Routes
+              <calcite-tree slot="children" id="Bike-Routes">
+                <calcite-tree-item expression="HC_Status IS NOT NULL">All Routes</calcite-tree-item>
+                <calcite-tree-item expression="HC_Status = 'Existing'">Existing Routes</calcite-tree-item>
+                <calcite-tree-item expression="HC_Status = 'Proposed'">Proposed Routes</calcite-tree-item>
+                <calcite-tree-item expression="HC_Status = 'Programmed'">Programmed Routes</calcite-tree-item>
               </calcite-tree>
             </calcite-tree-item>
           </calcite-tree>
@@ -183,6 +179,7 @@
           Select the layers to filter on:<br />
           <input class="featureLayerViewFilter" type="checkbox" name = "safety-index"/> Roads<br />
           <input class="featureLayerViewFilter" type="checkbox" name = "Crashes-Records"/> Crashes<br />
+          <input class="featureLayerViewFilter" type="checkbox" name = "Bike-Routes"/> Bike Routes<br />
           <input class="featureLayerViewFilter" type="checkbox" name = "age-population"/> Census Tracts<br />
           <button class="esri-button" id="drawPolygon" type="button" style="width: 60%;">
             Draw a Polygon

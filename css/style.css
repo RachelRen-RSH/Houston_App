@@ -79,3 +79,9 @@ calcite-tab-title {
     height: 100vh;            /* Sets the height of the container to fill the viewport vertically */
     text-align: center;       /* Centers text for inline elements and text inside children */
 }
+
+.scrollable-content {
+    max-height: 400px;  /* Adjust the max-height as needed based on your modal size */
+    overflow-y: auto;   /* Adds vertical scroll */
+    padding: 16px;      /* Optional: Adds some spacing inside the scrollable area */
+  }

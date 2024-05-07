@@ -34,10 +34,38 @@ require([
     "esri/popup/content/LineChartMediaInfo"
 ], function (Map, MapView, GeoJSONLayer, GraphicsLayer, BasemapGallery, Legend, AreaMeasurement2D, SketchViewModel, Print, Search, ScaleBar, TimeSlider, FeatureFilter, clusterLabelCreator, lang, promiseUtils, reactiveUtils, geometryEngine, LineChartMediaInfo) {
     // Add layers to the map
-    // Define the bin map of the crash layer
-    // Esri color ramps - Esri Yellow and Green 1
-    // #beac2dff,#e8d966ff,#fff58fff,#00bab5ff,#00807dff
-    const colors = ["#beac2dff", "#e8d966ff", "#fff58fff", "#00bab5ff", "#00807dff"];
+    
+    const colors = ["#756bb1b3", "#d8b365b3", "#c51b7db3", "#636363b3"];
+
+    const commonProperties = {
+        type: "simple-line",
+        width: "2px",
+        style: "solid"
+      };
+
+      const dedicated = {
+        ...commonProperties,
+        color: colors[0]
+      };
+
+      // Symbol for U.S. Highways
+      const shared = {
+        ...commonProperties,
+        color: colors[1]
+      };
+
+      // Symbol for state highways
+      const offstreet = {
+        ...commonProperties,
+        color: colors[2]
+      };
+
+      // Symbol for other major highways
+      const unknown = {
+        ...commonProperties,
+        color: colors[3]
+      };
+
 
     const clusterConfig = {
         type: "cluster",
@@ -124,10 +152,10 @@ require([
 
 
     var roadLayer = new GeoJSONLayer({
-        url: "data/combined_road_new.geojson",
+        url: "data/combined_road.geojson",
         title: "Roads",
         popupTemplate: {
-            title: "{Full_Nm_x} -- Rank {p_rank}",
+            title: "{Full_Nm_x} -- Rank {Safety_Index}",
             content: [
                 {
                     type: "media",
@@ -205,31 +233,31 @@ require([
             visualVariables: [
                 {
                     type: "color",
-                    field: "p_rank",
+                    field: "Safety_Index",
                     //normalizationField: 
                     stops: [
                         {
-                            value: "5",
+                            value: 5,
                             color: "#A50104", // will be assigned this color (beige)
                             label: "5 - Highest Priority" // label to display in the legend
                         },
                         {
-                            value: "4",
+                            value: 4,
                             color: "#F26419", // will be assigned this color (purple)
                             label: "4 - High Priority"
                         },
                         {
-                            value: "3",
+                            value: 3,
                             color: "#8AAA79", // will be assigned this color (purple)
                             label: "3 - Fair"
                         },
                         {
-                            value: "2",
+                            value: 2,
                             color: "#283D3B", // will be assigned this color (purple)
                             label: "2 - Low Priority"
                         },
                         {
-                            value: "1",
+                            value: 1,
                             color: "#55B0E0", // will be assigned this color (purple)
                             label: "1 - Lowest Priority" // label to display in the legend
                         }
@@ -316,6 +344,61 @@ require([
         outFields: ["*"]
     });
 
+    var bikeLayer = new GeoJSONLayer({
+        url: "data/bike_lanes.geojson",
+        title: "Bike Routes",
+        popupTemplate: {
+            title: "{Full_Name} -- {HC_Status}",
+            content: [
+                {
+                    type: "fields",
+                    fieldInfos: [
+                        {
+                            fieldName: "HC_Class",
+                            label: "HC Class"
+                        },
+                    ]
+                }
+            ]
+        },
+        renderer: {
+            type: "unique-value", 
+            legendOptions: {
+              title: "Route Class"
+            },
+            defaultSymbol: unknown,
+            defaultLabel: "Unknown",
+            field: "HC_Class",
+  
+            uniqueValueInfos: [
+              {
+                value: "Dedicated On-Street - HC", 
+                symbol: dedicated,
+                label: "Dedicated On-Street"
+              },
+              {
+                value: "Shared On-Street - HC", // code for U.S. highways
+                symbol: shared,
+                label: "Shared On-Street"
+              },
+              {
+                value: "Off-Street", // code for U.S. highways
+                symbol: offstreet,
+                label: "Off-Street"
+              },
+              {
+                value: "unknown", // code for U.S. highways
+                symbol: unknown,
+                label: "Unknown"
+              }
+            ]
+  
+          },
+        visible: false,
+        outFields: ["*"]
+    });
+
+
     var demoLayer = new GeoJSONLayer({
         url: "data/city_demographics.geojson",
         title: "Demographics",
@@ -358,7 +441,8 @@ require([
 
     const tree_with_layer = {
         "safety-index": roadLayer,
-        "Crashes-Records": crashLayer, // Ensure this ID matches your HTML
+        "Crashes-Records": crashLayer,
+        "Bike-Routes": bikeLayer,
         "age-population": demoLayer,
         "vehicle-ownership": demoLayer,
         "commuters-type": demoLayer,
@@ -368,6 +452,7 @@ require([
     var layerExpressions = {
         "safety-index": "",
         "Crashes-Records": "",
+        "Bike-Routes": "",
         "age-population": "",
         "vehicle-ownership": "",
         "commuters-type": "",
@@ -375,7 +460,7 @@ require([
 
     var map = new Map({
         basemap: "gray",
-        layers: [demoLayer, roadLayer, crashLayer]
+        layers: [demoLayer, roadLayer, bikeLayer, crashLayer]
     });
 
 
@@ -702,7 +787,7 @@ require([
                 } else {
                     e.target.setAttribute('selected', '');
                 }
-                if (tree.parentElement.parentElement.id == "roads" || tree.parentElement.parentElement.id == "amenities") {
+                if (tree.parentElement.parentElement.id == "roads") {
                     // Re-apply filters based on new selection state
                     currentExpression = getCombinedExpression(tree, tree.id);
                     applyFiltersBasedOnSelection(tree);
